@@ -14,7 +14,7 @@ using namespace System::Net::Sockets;
 using namespace System::Net;
 using namespace System::Text;
 
-#define NUM_UNITS 1                             //how many modules you set up
+#define NUM_UNITS 3                             //how many modules you set up
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
@@ -23,10 +23,10 @@ void StartProcesses();
 TCHAR Units[10][20] =                           //array of .exe file names for main loop to find
 {
 	TEXT("GPS.exe"),
-	TEXT("LASER.exe"),
+	TEXT("Camera.exe"),
+	TEXT("Display.exe"),
 	TEXT("VehicleControl.exe"),
-	TEXT("OpenGL.exe"),
-	TEXT("Camera.exe")
+	TEXT("LASER.exe")
 };
 
 int main()

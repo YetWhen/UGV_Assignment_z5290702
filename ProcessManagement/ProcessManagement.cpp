@@ -31,8 +31,18 @@ TCHAR Units[10][20] =                           //array of .exe file names for m
 
 int main()
 {
+	//setup shared memory
+	
 	//start all 5 modules
 	StartProcesses();
+
+	//monitor heartbeats, print heartbeats
+
+	//process management (restart/shutdown)
+
+	//routine shutdown
+
+
 	return 0;
 }
 

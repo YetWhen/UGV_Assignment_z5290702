@@ -15,12 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GPS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="GPSmain.cpp">
+    <ClCompile Include="LaserMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

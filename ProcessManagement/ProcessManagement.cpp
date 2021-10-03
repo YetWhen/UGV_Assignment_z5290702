@@ -102,7 +102,7 @@ int main()
 					if (Critical[i])
 					{
 						PMData->Shutdown.Status = 0xFF;
-						std::cout << "Critical process " << Units[i] << " failed, exit." <<PMData->LifeCounter[i]<< std::endl;
+						std::cout << "Critical process " << Units[i] << " failed, exit." <<PMData->LifeCounter[i]<<" "<<(int)PMData->Heartbeat.Flags.Display << std::endl;
 						shutdown = 1;
 						getch();
 						break;

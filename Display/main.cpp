@@ -4,25 +4,26 @@
 #include <cstring>
 #include <sstream>
 #include <map>
-
+#include "smstructs.h"
+#include "SMObject.h"
 #ifdef __APPLE__
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glu.h>
-	#include <GLUT/glut.h>
-	#include <unistd.h>
-	#include <sys/time.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <GLUT/glut.h>
+#include <unistd.h>
+#include <sys/time.h>
 #elif defined(WIN32)
-	#include <Windows.h>
-	#include <tchar.h>
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-	#include <GL/glut.h>
+#include <Windows.h>
+#include <tchar.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
 #else
-	#include <GL/gl.h>
-	#include <GL/glu.h>
-	#include <GL/glut.h>
-	#include <unistd.h>
-	#include <sys/time.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <unistd.h>
+#include <sys/time.h>
 #endif
 
 
@@ -37,13 +38,9 @@
 #include "Messages.hpp"
 #include "HUD.hpp"
 
-#include "smstructs.h"
-#include "SMObject.h"
-using namespace System::Threading;
 void display();
 void reshape(int width, int height);
 void idle();
-void HeartbeatMonitor();
 
 void keydown(unsigned char key, int x, int y);
 void keyup(unsigned char key, int x, int y);
@@ -56,36 +53,36 @@ void motion(int x, int y);
 
 using namespace std;
 using namespace scos;
+using namespace System::Threading;
 
 // Used to store the previous mouse location so we
 //   can calculate relative mouse movement.
 int prev_mouse_x = -1;
 int prev_mouse_y = -1;
-ProcessManagement* PMData = NULL;
-
 
 // vehicle control related variables
-Vehicle * vehicle = NULL;
+Vehicle* vehicle = NULL;
 double speed = 0;
 double steering = 0;
 
+//process management related pointer
+ProcessManagement* PMData = NULL;
+
 //int _tmain(int argc, _TCHAR* argv[]) {
-int main(int argc, char ** argv) {
-	//declare Shared memory
+int main(int argc, char** argv) {
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	const int WINDOW_WIDTH = 800;
+	const int WINDOW_HEIGHT = 600;
+	//processmanagement
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 
-
-	const int WINDOW_WIDTH = 800;
-	const int WINDOW_HEIGHT = 600;
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("MTRN3500 - GL");
-
 
 	Camera::get()->setWindowDimensions(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -93,7 +90,6 @@ int main(int argc, char ** argv) {
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	glutIdleFunc(HeartbeatMonitor);
 	glutIdleFunc(idle);
 
 	glutKeyboardFunc(keydown);
@@ -114,6 +110,10 @@ int main(int argc, char ** argv) {
 
 
 	glutMainLoop();
+
+	if (vehicle != NULL) {
+		delete vehicle;
+	}
 
 	return 0;
 }
@@ -153,6 +153,7 @@ void display() {
 
 	glutSwapBuffers();
 };
+
 void reshape(int width, int height) {
 
 	Camera::get()->setWindowDimensions(width, height);
@@ -166,7 +167,7 @@ double getTime()
 #if defined(WIN32)
 	LARGE_INTEGER freqli;
 	LARGE_INTEGER li;
-	if(QueryPerformanceCounter(&li) && QueryPerformanceFrequency(&freqli)) {
+	if (QueryPerformanceCounter(&li) && QueryPerformanceFrequency(&freqli)) {
 		return double(li.QuadPart) / double(freqli.QuadPart);
 	}
 	else {
@@ -182,7 +183,6 @@ double getTime()
 
 void idle() {
 
-	
 	if (KeyManager::get()->isAsciiKeyPressed('a')) {
 		Camera::get()->strafeLeft();
 	}
@@ -211,7 +211,7 @@ void idle() {
 	steering = 0;
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_LEFT)) {
-		steering = Vehicle::MAX_LEFT_STEERING_DEGS * -1;   
+		steering = Vehicle::MAX_LEFT_STEERING_DEGS * -1;
 	}
 
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_RIGHT)) {
@@ -226,7 +226,21 @@ void idle() {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
 	}
 
-	
+	//------------------------PM
+	if (PMData->Heartbeat.Flags.Display == 0)
+	{
+		PMData->Heartbeat.Flags.Display = 1;
+		std::cout << "turn up heartbeat: " << (int)PMData->Heartbeat.Flags.Display << std::endl;
+	}
+	else if (PMData->PMTimeStamp > PMData->PMLimit)
+		PMData->Shutdown.Status = 0xFF;
+
+	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
+	{
+		exit(0);
+	}
+	//-----------------------------
+
 
 	const float sleep_time_between_frames_in_seconds = 0.025;
 
@@ -241,13 +255,6 @@ void idle() {
 	}
 
 	display();
-
-	
-
-
-if (vehicle != NULL) {
-	delete vehicle;
-}
 
 #ifdef _WIN32 
 	Sleep(sleep_time_between_frames_in_seconds * 1000);
@@ -267,7 +274,7 @@ void keydown(unsigned char key, int x, int y) {
 	switch (key) {
 	case 27: // ESC key
 		exit(0);
-		break;      
+		break;
 	case '0':
 		Camera::get()->jumpToOrigin();
 		break;
@@ -288,8 +295,8 @@ void special_keydown(int keycode, int x, int y) {
 
 };
 
-void special_keyup(int keycode, int x, int y) {  
-	KeyManager::get()->specialKeyReleased(keycode);  
+void special_keyup(int keycode, int x, int y) {
+	KeyManager::get()->specialKeyReleased(keycode);
 };
 
 void mouse(int button, int state, int x, int y) {
@@ -316,20 +323,3 @@ void motion(int x, int y) {
 	prev_mouse_y = y;
 };
 
-void HeartbeatMonitor(void) {
-	//------------------------PM
-	if (PMData->Heartbeat.Flags.Display == 0)
-	{
-		PMData->Heartbeat.Flags.Display = 1;
-		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
-	}
-	else if (PMData->PMTimeStamp > PMData->PMLimit)
-		PMData->Shutdown.Status = 0xFF;
-
-	//Thread::Sleep(25);
-	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
-	{
-		exit(0);
-	}
-	//-----------------------------
-}

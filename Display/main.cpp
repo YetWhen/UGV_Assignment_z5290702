@@ -43,6 +43,7 @@ using namespace System::Threading;
 void display();
 void reshape(int width, int height);
 void idle();
+void HeartbeatMonitor();
 
 void keydown(unsigned char key, int x, int y);
 void keyup(unsigned char key, int x, int y);
@@ -72,7 +73,7 @@ double steering = 0;
 int main(int argc, char ** argv) {
 	//declare Shared memory
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-
+	PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 
@@ -92,6 +93,7 @@ int main(int argc, char ** argv) {
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
+	glutIdleFunc(HeartbeatMonitor);
 	glutIdleFunc(idle);
 
 	glutKeyboardFunc(keydown);
@@ -120,28 +122,14 @@ int main(int argc, char ** argv) {
 void display() {
 	// -------------------------------------------------------------------------
 	//  This method is the main draw routine. 
-	std::cout << "This is display funciton" << std::endl;
-	/*//------------------------PM
-	if (PMData->Heartbeat.Flags.Display == 0)
-	{
-		PMData->Heartbeat.Flags.Display = 1;
-		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
-	}
-	else if (PMData->PMTimeStamp > PMData->PMLimit)
-		PMData->Shutdown.Status = 0xFF;
+	// -------------------------------------------------------------------------
 
-	//Thread::Sleep(25);
-	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
-		exit(0);
-	//-----------------------------
-	//--------------------------------------------------*/
-	std::cout << "this is Display module" << std::endl;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	if(Camera::get()->isPursuitMode() && vehicle != NULL) {
+	if (Camera::get()->isPursuitMode() && vehicle != NULL) {
 		double x = vehicle->getX(), y = vehicle->getY(), z = vehicle->getZ();
 		double dx = cos(vehicle->getRotation() * 3.141592765 / 180.0);
 		double dy = sin(vehicle->getRotation() * 3.141592765 / 180.0);
@@ -152,7 +140,7 @@ void display() {
 	Camera::get()->setLookAt();
 
 	Ground::draw();
-	
+
 	// draw my vehicle
 	if (vehicle != NULL) {
 		vehicle->draw();
@@ -165,7 +153,6 @@ void display() {
 
 	glutSwapBuffers();
 };
-
 void reshape(int width, int height) {
 
 	Camera::get()->setWindowDimensions(width, height);
@@ -329,4 +316,20 @@ void motion(int x, int y) {
 	prev_mouse_y = y;
 };
 
+void HeartbeatMonitor(void) {
+	//------------------------PM
+	if (PMData->Heartbeat.Flags.Display == 0)
+	{
+		PMData->Heartbeat.Flags.Display = 1;
+		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
+	}
+	else if (PMData->PMTimeStamp > PMData->PMLimit)
+		PMData->Shutdown.Status = 0xFF;
 
+	//Thread::Sleep(25);
+	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
+	{
+		exit(0);
+	}
+	//-----------------------------
+}

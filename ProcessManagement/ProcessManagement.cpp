@@ -24,7 +24,7 @@ void Restart1Process(int i);
 //defining start up sequence
 TCHAR Units[10][20] =                           //array of .exe file names for main loop to find
 {
-	TEXT("LASER.exe"),
+	TEXT("Laser.exe"),
 	TEXT("Display.exe"),
 	TEXT("VehicleControl.exe"),
 	TEXT("GPS.exe"),
@@ -45,7 +45,7 @@ int main()
 	// 
 	//create an array of module names and a critical list in its corresponding order.
 	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
-	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 0 };      //11100
+	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 0, 1, 1, 0, 0 };      //11100
 	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 3, 6, 3, 3, 3 };
 
 	unsigned char shutdown = 0;

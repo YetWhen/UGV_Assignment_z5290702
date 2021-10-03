@@ -40,27 +40,31 @@ struct SM_GPS
 
 struct UnitFlags
 {
-	unsigned char	ProcessManagement : 1,	//NONCRITICAL
-					Laser : 1,				//NONCRITICAL
-					VehicleControl : 1,		//NONCRITICAL
-					GPS : 1,				//NONCRITICAL
-					OpenGL : 1,				//NONCRITICAL
-					Camera : 1,				//NONCRITICAL
-					Garbage : 2;
+	unsigned char	//ProcessManagement : 1,	
+					Laser : 1,	
+					Display : 1,			
+					VehicleControl : 1,		
+					GPS : 1,				
+					Camera : 1,				
+					Garbage : 7;
 };
 
 union ExecFlags
 {
 	UnitFlags Flags;
-	unsigned short Status;
+	unsigned short Status = 0xFF;
 };
 
 struct ProcessManagement
 {
 	ExecFlags Heartbeat;
 	ExecFlags Shutdown;
-	long int LifeCounter;
+	double PMLimit = 2000;  //100ms as PM die-out limit
+	double PMTimeStamp;
+	long int LifeCounter[5];
 };
+
+
 
 #define NONCRITICALMASK 0xff	//0 011 0000
 #define CRITICALMASK 0x0		//0 100 1111

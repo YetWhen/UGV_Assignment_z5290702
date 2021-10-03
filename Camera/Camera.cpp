@@ -1,5 +1,5 @@
 #include <zmq.hpp>
-#include <Windows.h>
+#include <Windows.h>//for high quality time counter in windows system
 
 #include "SMStructs.h"
 #include "SMFcn.h"
@@ -10,6 +10,14 @@
 #include <GL/glut.h>
 
 #include <turbojpeg.h>
+
+#using<System.dll>       
+#include<conio.h>
+
+using namespace System;
+using namespace System::Diagnostics;
+using namespace System::Threading;
+
 
 void display();
 void idle();
@@ -22,7 +30,7 @@ zmq::socket_t subscriber(context, ZMQ_SUB);
 
 int main(int argc, char** argv)
 {
-	//Define window size
+    //Define window size
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
 
@@ -41,7 +49,7 @@ int main(int argc, char** argv)
 	subscriber.connect("tcp://192.168.1.200:26000");
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
-	glutMainLoop();
+	glutMainLoop();     
 
 	return 1;
 }
@@ -65,7 +73,27 @@ void display()
 }
 void idle()
 {
+	// -------------------------------------------------------------------------
+	//declare Shared memory
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 
+	PMObj.SMAccess();
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	//------------------------PM
+	if (PMData->Heartbeat.Flags.Camera == 0)
+	{
+		PMData->Heartbeat.Flags.Camera = 1;
+		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
+	}
+	else if (PMData->PMTimeStamp > PMData->PMLimit)
+		PMData->Shutdown.Status = 0xFF;
+
+	//Thread::Sleep(25);
+	if (PMData->Shutdown.Flags.Camera)   //emergency shutdown controlled by shared memory
+		exit(0);
+	//-----------------------------
+
+	//--------------------------------------------------
 	//receive from zmq
 	zmq::message_t update;
 	if (subscriber.recv(&update, ZMQ_NOBLOCK))

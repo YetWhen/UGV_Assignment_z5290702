@@ -1,11 +1,3 @@
-#using<System.dll>
-#include<Windows.h>          //for high quality time counter in windows system
-#include<conio.h>
-
-using namespace System;
-using namespace System::Diagnostics;
-using namespace System::Threading;
-
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
@@ -45,6 +37,9 @@ using namespace System::Threading;
 #include "Messages.hpp"
 #include "HUD.hpp"
 
+#include "smstructs.h"
+#include "SMObject.h"
+using namespace System::Threading;
 void display();
 void reshape(int width, int height);
 void idle();
@@ -65,6 +60,8 @@ using namespace scos;
 //   can calculate relative mouse movement.
 int prev_mouse_x = -1;
 int prev_mouse_y = -1;
+ProcessManagement* PMData = NULL;
+
 
 // vehicle control related variables
 Vehicle * vehicle = NULL;
@@ -73,15 +70,21 @@ double steering = 0;
 
 //int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char ** argv) {
+	//declare Shared memory
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+
+	PMObj.SMAccess();
+	PMData = (ProcessManagement*)PMObj.pData;
+
 
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
-
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("MTRN3500 - GL");
+
 
 	Camera::get()->setWindowDimensions(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -110,34 +113,6 @@ int main(int argc, char ** argv) {
 
 	glutMainLoop();
 
-	if (vehicle != NULL) {
-		delete vehicle;
-	}
-
-	// -------------------------------------------------------------------------
-	// time stamp
-	// -------------------------------------------------------------------------
-	//Declaration for timestamp
-	double DisplayTimeStamp;
-	__int64 Frequency, Counter;//the counter in windows is quite fast, set 64bit to prevent overflow
-	int Shutdown = 0x00;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&Frequency);//this function's input: pointer to LARGE_INTEGER type, write in frequency, returns a bool
-
-	//main loop, counting time
-	while (1)
-	{
-		QueryPerformanceCounter((LARGE_INTEGER*)&Counter);//input a pointer/address pointing to Counter, and do the counting
-		DisplayTimeStamp = (double)Counter / (double)Frequency * 1000; //do calculation in double form, 1*1000 ms = 1s
-		Console::WriteLine("Display time stamp :{0,12:F3} {1,12:X3}", DisplayTimeStamp, Shutdown); //{0,12:F3} for format manuplation
-		Thread::Sleep(25);
-		if (Shutdown)
-			break;
-		if (_kbhit())
-			break;
-
-	}
-	Console::ReadKey();
-
 	return 0;
 }
 
@@ -145,8 +120,22 @@ int main(int argc, char ** argv) {
 void display() {
 	// -------------------------------------------------------------------------
 	//  This method is the main draw routine. 
-	// -------------------------------------------------------------------------
+	std::cout << "This is display funciton" << std::endl;
+	/*//------------------------PM
+	if (PMData->Heartbeat.Flags.Display == 0)
+	{
+		PMData->Heartbeat.Flags.Display = 1;
+		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
+	}
+	else if (PMData->PMTimeStamp > PMData->PMLimit)
+		PMData->Shutdown.Status = 0xFF;
 
+	//Thread::Sleep(25);
+	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
+		exit(0);
+	//-----------------------------
+	//--------------------------------------------------*/
+	std::cout << "this is Display module" << std::endl;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -206,6 +195,7 @@ double getTime()
 
 void idle() {
 
+	
 	if (KeyManager::get()->isAsciiKeyPressed('a')) {
 		Camera::get()->strafeLeft();
 	}
@@ -249,8 +239,7 @@ void idle() {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
 	}
 
-
-
+	
 
 	const float sleep_time_between_frames_in_seconds = 0.025;
 
@@ -265,6 +254,13 @@ void idle() {
 	}
 
 	display();
+
+	
+
+
+if (vehicle != NULL) {
+	delete vehicle;
+}
 
 #ifdef _WIN32 
 	Sleep(sleep_time_between_frames_in_seconds * 1000);

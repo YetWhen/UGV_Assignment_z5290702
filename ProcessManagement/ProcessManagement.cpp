@@ -6,42 +6,131 @@
 #include <iostream>
 #include <conio.h>
 
-#include "SMStructs.h"
+#include "smstructs.h"
 #include "SMObject.h"
 
 using namespace System;
 using namespace System::Net::Sockets;
 using namespace System::Net;
 using namespace System::Text;
+using namespace System::Threading;
 
-#define NUM_UNITS 3                             //how many modules you set up
+#define NUM_UNITS  2                          //how many modules you set up
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
+void Restart1Process(int i);
 
 //defining start up sequence
 TCHAR Units[10][20] =                           //array of .exe file names for main loop to find
 {
-	TEXT("GPS.exe"),
-	TEXT("Camera.exe"),
+	TEXT("LASER.exe"),
 	TEXT("Display.exe"),
 	TEXT("VehicleControl.exe"),
-	TEXT("LASER.exe")
+	TEXT("GPS.exe"),
+	TEXT("Camera.exe")
 };
-
+	struct GPS                                   //latitude and longitude, SM_GPS has nothing easting height
+	{
+		double Lat;
+		double Long;
+		char Header[4];
+	};
 int main()
 {
-	//setup shared memory
+	//declare shared memory
+	SMObject PMObj(_TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	/*-------------------------------------------------------------------*/
+	//Teleoperation
+	// 
+	//create an array of module names and a critical list in its corresponding order.
+	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
+	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 0 };      //11100
+	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 3, 6, 3, 3, 3 };
+
+	unsigned char shutdown = 0;
 	
-	//start all 5 modules
+	//start all 5 modules, replacing the lecture Process handle operation codes
 	StartProcesses();
+	/*-------------------------------------------------------------------*/
 
-	//monitor heartbeats, print heartbeats
+	PMObj.SMCreate();
+	PMObj.SMAccess();
 
-	//process management (restart/shutdown)
+	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+
+	while (!_kbhit()) 
+	{
+		//refresh PMTimeStamp (relative);
+		
+		
+		 
+		
+		 
+		//check for heartbeats
+			//iterate through all processes
+			//if true, turn the bit of process[i] off
+		    //if false, increase heartbeat lost counter (life counter)
+		        //check if counter passes limit for process[i]                 have a limit array corresponding to i th process
+		        //if passed, is process critical                               have a critical array to compare
+					//true, shutdown all                                       shutdown=0xFF
+					//false, has process exited?                               use modulelist to check
+						//true, start()                                        use modulelist and Process
+						//false, kill() then start().
+		        //if didn't pass limit, increase the counter for process[i]
+		
+		for (int i = 0; i < NUM_UNITS; i++)
+		{
+			//PMData->Heartbeat.Status & (1<<i)     
+			//by shifting 1 bit by bit (00000001, 00000010,...) use AND & operation to compare with Status byte bit by bit.
+			//eg. status & 00000001 = first(LSB, 0th) bit of status
+
+			if (PMData->Heartbeat.Status & (1 << i))
+			{
+				
+				PMData->Heartbeat.Status = PMData->Heartbeat.Status & (~(1 << i));  //turn i th bit to 0, turning off heartbeat
+				PMData->LifeCounter[i] = 0;
+			
+
+			}
+			else
+			{
+				PMData->LifeCounter[i]++;
+
+				if (PMData->LifeCounter[i] > TimeLimit[i])
+				{
+					if (Critical[i])
+					{
+						PMData->Shutdown.Status = 0xFF;
+						std::cout << "Critical process " << Units[i] << " failed, exit." <<PMData->LifeCounter[i]<< std::endl;
+						shutdown = 1;
+						getch();
+						break;
+					}
+					else if (IsProcessRunning(Units[i]))
+					{
+						PMData->Shutdown.Status = PMData->Heartbeat.Status | (1 << i); //turn i th bit to 1
+						Restart1Process(i);
+					}
+					else
+					{
+						Restart1Process(i);
+					}
+				}
+			}
+			
+		}
+		    
+		Thread::Sleep(1000);	
+		if (shutdown) {
+			break;
+		}
+
+	}
 
 	//routine shutdown
 
+	PMData->Shutdown.Status = 0xFF;
 
 	return 0;
 }
@@ -88,4 +177,37 @@ void StartProcesses()
 			Sleep(100);
 		}
 	}
+}
+
+//single process opening function, 1-D version of StartProcesses
+void Restart1Process(int i)
+{
+	// additional information
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+	// start the program up
+	if (!CreateProcess(NULL,   // the path
+		Units[i],        // Command line
+		NULL,           // Process handle not inheritable
+		NULL,           // Thread handle not inheritable
+		FALSE,          // Set handle inheritance to FALSE
+		CREATE_NEW_CONSOLE,
+		NULL,           // Use parent's environment block
+		NULL,           // Use parent's starting directory 
+		&si,            // Pointer to STARTUPINFO structure
+		&pi             // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
+	)) {
+		printf("%s failed (%d).\n", Units[i], GetLastError());
+		_getch();
+	}
+	std::cout << "Restarted: " << Units[i] << std::endl;   //this function is only used in restarting process
+	Sleep(100);
+/*	// Close process and thread handles. 
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread); */
 }

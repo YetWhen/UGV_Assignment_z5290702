@@ -117,6 +117,7 @@
     <ClInclude Include="GPS.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Common\SMObject.cpp" />
     <ClCompile Include="GPSmain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

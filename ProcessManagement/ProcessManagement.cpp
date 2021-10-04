@@ -15,7 +15,7 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Threading;
 
-#define NUM_UNITS  2                          //how many modules you set up
+#define NUM_UNITS  5                          //how many modules you set up
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();
@@ -45,20 +45,21 @@ int main()
 	// 
 	//create an array of module names and a critical list in its corresponding order.
 	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
-	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 0, 1, 1, 0, 0 };      //11100
-	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 3, 6, 3, 3, 3 };
+	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 0 };      //11100
+	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 1, 1, 1, 3, 1000 };
 
 	unsigned char shutdown = 0;
 	
-	//start all 5 modules, replacing the lecture Process handle operation codes
-	StartProcesses();
+
 	/*-------------------------------------------------------------------*/
 
 	PMObj.SMCreate();
 	PMObj.SMAccess();
 
 	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-
+	PMData->Shutdown.Status = 0x00;
+	//start all 5 modules, replacing the lecture Process handle operation codes
+	StartProcesses();
 	while (!_kbhit()) 
 	{
 		//refresh PMTimeStamp (relative);

@@ -1,5 +1,5 @@
 #include <zmq.hpp>
-#include <Windows.h>//for high quality time counter in windows system
+#include <Windows.h>
 
 #include "SMStructs.h"
 #include "SMFcn.h"
@@ -11,14 +11,6 @@
 
 #include <turbojpeg.h>
 
-#using<System.dll>       
-#include<conio.h>
-
-using namespace System;
-using namespace System::Diagnostics;
-using namespace System::Threading;
-
-
 void display();
 void idle();
 
@@ -28,12 +20,22 @@ GLuint tex;
 zmq::context_t context(1);
 zmq::socket_t subscriber(context, ZMQ_SUB);
 
+//process management related pointer
+ProcessManagement* PMData = NULL;
+//PM counter
+int PMCounter = 0;
+
 int main(int argc, char** argv)
 {
-    //Define window size
+	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	//Define window size
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
-
+	//processmanagement
+	//PMObj.SMCreate();
+	PMObj.SMAccess();
+	PMData = (ProcessManagement*)PMObj.pData;
+	std::cout << "shutdown flag: " << (int)PMData->Shutdown.Flags.Camera << std::endl;
 	//GL Window setup
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -49,7 +51,7 @@ int main(int argc, char** argv)
 	subscriber.connect("tcp://192.168.1.200:26000");
 	subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
 
-	glutMainLoop();     
+	glutMainLoop();
 
 	return 1;
 }
@@ -73,27 +75,32 @@ void display()
 }
 void idle()
 {
-	// -------------------------------------------------------------------------
-	//declare Shared memory
-	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
-
-	PMObj.SMAccess();
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
-	//------------------------PM
+	//------------------------PM----------------------------------------------------------------------------
 	if (PMData->Heartbeat.Flags.Camera == 0)
 	{
 		PMData->Heartbeat.Flags.Camera = 1;
-		std::cout << "turn up heartbeat: " << PMData->Heartbeat.Status << std::endl;
+		std::cout << "turn up heartbeat: " << (int)PMData->Heartbeat.Flags.Camera << " PMCounter: " << PMCounter << std::endl;
+		std::cout << "shutdown flag: " << (int)PMData->Shutdown.Flags.Camera << std::endl;
+		PMCounter = 0;
 	}
-	else if (PMData->PMTimeStamp > PMData->PMLimit)
-		PMData->Shutdown.Status = 0xFF;
-
-	//Thread::Sleep(25);
+	//else 
+	else
+	{
+		PMCounter++;
+		if (PMCounter > 5000)
+		{
+			PMData->Shutdown.Status = 0xFF;
+			std::cout << "No response from PM" << " PMCounter: " << PMCounter << std::endl;
+		}
+	}
 	if (PMData->Shutdown.Flags.Camera)   //emergency shutdown controlled by shared memory
+	{
+		std::cout << "called shutdown " << (int)PMData->Shutdown.Flags.Camera << " PMCounter: " << PMCounter << std::endl;
 		exit(0);
-	//-----------------------------
+	}
+	//-------------------------------------------------------------------------------------------------------
 
-	//--------------------------------------------------
+
 	//receive from zmq
 	zmq::message_t update;
 	if (subscriber.recv(&update, ZMQ_NOBLOCK))

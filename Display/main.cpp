@@ -67,14 +67,15 @@ double steering = 0;
 
 //process management related pointer
 ProcessManagement* PMData = NULL;
-
+//PM counter
+int PMCounter = 0;
 //int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char** argv) {
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
 	//processmanagement
-	PMObj.SMCreate();
+	//PMObj.SMCreate();
 	PMObj.SMAccess();
 	PMData = (ProcessManagement*)PMObj.pData;
 
@@ -114,7 +115,6 @@ int main(int argc, char** argv) {
 	if (vehicle != NULL) {
 		delete vehicle;
 	}
-
 	return 0;
 }
 
@@ -226,20 +226,25 @@ void idle() {
 		speed = Vehicle::MAX_BACKWARD_SPEED_MPS;
 	}
 
-	//------------------------PM
+	//------------------------PM----------------------------------------------------------------------------
 	if (PMData->Heartbeat.Flags.Display == 0)
 	{
 		PMData->Heartbeat.Flags.Display = 1;
-		std::cout << "turn up heartbeat: " << (int)PMData->Heartbeat.Flags.Display << std::endl;
+		std::cout << "turn up heartbeat: " << (int)PMData->Heartbeat.Flags.Display <<" PMCounter: " << PMCounter<< std::endl;
+		PMCounter = 0;
 	}
-	else if (PMData->PMTimeStamp > PMData->PMLimit)
-		PMData->Shutdown.Status = 0xFF;
-
+	//else 
+	else
+	{
+		PMCounter++;
+		if (PMCounter > 40)
+			PMData->Shutdown.Status = 0xFF;
+	}
 	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
 	{
 		exit(0);
 	}
-	//-----------------------------
+	//-------------------------------------------------------------------------------------------------------
 
 
 	const float sleep_time_between_frames_in_seconds = 0.025;

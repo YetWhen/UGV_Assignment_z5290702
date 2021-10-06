@@ -2,6 +2,7 @@
 #include"SMObject.h"
 int Laser::connect(String^ hostName, int portNumber) 
 {
+
 	// Pointer to TcpClent type object on managed heap
 	TcpClient^ Client;
 
@@ -9,8 +10,6 @@ int Laser::connect(String^ hostName, int portNumber)
 	// These command are available on Galil RIO47122 command reference manual
 	// available online
 	String^ AskScan = gcnew String("sRN LMDscandata");
-	// String to store received data for display
-	String^ ResponseData;
 
 	// Creat TcpClient object and connect to it, Assignment 1 platform address: "Weeder" 192.168.1.200
 	Client = gcnew TcpClient("192.168.1.200", portNumber);
@@ -40,7 +39,7 @@ int Laser::connect(String^ hostName, int portNumber)
 	// Convert incoming data from an array of unsigned char bytes to an ASCII string
 	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	// Print the received string on the screen
-	Console::WriteLine(ResponseData);
+	//Console::WriteLine(ResponseData);
 	/*----------------------------------------------------------------*/
 
 	// Convert string command to an array of unsigned char
@@ -56,12 +55,16 @@ int Laser::setupSharedMemory()
 	//ProcessManagementData->SMCreate();
 	ProcessManagementData->SMAccess();
 	PMData = (ProcessManagement*) ProcessManagementData->pData;
+	SensorData = new SMObject;
+	SensorData->SetSize(sizeof(SM_Laser));
+	SensorData->SetSzname(TEXT("SM_Laser"));
+	SensorData->SMCreate();
+	SensorData->SMAccess();
+	LaserData = (SM_Laser*) SensorData->pData;
 	return 1;
 }
 int Laser::getData()
 {
-	
-	String^ ResponseData;
 /*----------------------Laser data interaction---------------------------------*/
 
 	// Write command asking for data
@@ -74,19 +77,30 @@ int Laser::getData()
 	Stream->Read(ReadData, 0, ReadData->Length);
 	// Convert incoming data from an array of unsigned char bytes to an ASCII string
 	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
-	// Print the received string on the screen
-	Console::WriteLine(ResponseData);
+
 	/*-------------------------end of Laser data interaction-----------------------*/
 	return 1;
 }
 int Laser::checkData()
 {
-	// YOUR CODE HERE
 	return 1;
 }
 int Laser::sendDataToSharedMemory()
-{
-	// YOUR CODE HERE
+{	
+	array<wchar_t>^ Space = {' '};
+	array<String^>^ StringArray = ResponseData->Split(Space);
+	//get basic parameters from data
+	double StartAngle = System::Convert::ToInt32(StringArray[23], 16);
+	double Resolution = System::Convert::ToInt32(StringArray[24], 16) / 10000.0;
+	int NumRanges = System::Convert::ToInt32(StringArray[25], 16);
+	array<double>^ Range = gcnew array<double>(NumRanges);
+	for (int i = 0; i < NumRanges; i++)
+	{
+		Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
+		LaserData->x[i] = Range[i] * sin(i * Resolution);
+		LaserData->y[i] = Range[i] * cos(i * Resolution);
+		Console::WriteLine("X-coordinate: {0,6:F2} , Y-Coordinate: {1,6:F2}", LaserData->x[i], LaserData->y[i]);
+	}
 	return 1;
 }
 bool Laser::getShutdownFlag()

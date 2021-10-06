@@ -33,4 +33,6 @@ public:
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
 	ProcessManagement* PMData;
+	array<unsigned char>^ SendData;
+	String^ AskScan;
 };

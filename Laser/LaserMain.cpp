@@ -11,16 +11,22 @@
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Threading;
+
+//using namespace System;
+using namespace System::Net::Sockets;
+using namespace System::Net;
+using namespace System::Text;
+
 int main()
 {
 
 	Laser ^ LaserModule = gcnew Laser;
 
 	LaserModule->setupSharedMemory();
-
+	LaserModule->connect("z5290702\n",23000);
 	int PMcounter = 0;
 
-
+	
 	//main loop, counting time
 	while (1)
 	{
@@ -39,8 +45,8 @@ int main()
 				break;
 			}
 		}
-
-
+		LaserModule->getData();
+		
 		Thread::Sleep(25);
 		if (LaserModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;
@@ -49,6 +55,5 @@ int main()
 
 	}
 
-	LaserModule->~Laser();
 	return 0;
 }

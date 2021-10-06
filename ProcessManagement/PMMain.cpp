@@ -40,6 +40,8 @@ int main()
 {
 	//declare shared memory
 	SMObject PMObj(_TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	SMObject* PMPtr = new SMObject;
+	*PMPtr = PMObj;
 	/*-------------------------------------------------------------------*/
 	//Teleoperation
 	// 
@@ -53,10 +55,11 @@ int main()
 
 	/*-------------------------------------------------------------------*/
 
-	PMObj.SMCreate();
-	PMObj.SMAccess();
+	PMPtr->SMCreate();
+	PMPtr->SMAccess();
 
-	ProcessManagement* PMData = (ProcessManagement*)PMObj.pData;
+	ProcessManagement* PMData = new ProcessManagement;
+	PMData = (ProcessManagement*) PMPtr->pData;
 	PMData->Shutdown.Status = 0x00;
 	//start all 5 modules, replacing the lecture Process handle operation codes
 	StartProcesses();
@@ -126,13 +129,21 @@ int main()
 		if (shutdown) {
 			break;
 		}
-
+		
 	}
 
 	//routine shutdown
 
 	PMData->Shutdown.Status = 0xFF;
-
+	for(int i = 0; i<NUM_UNITS ; i++)
+	{ 
+		while (IsProcessRunning(Units[i]))
+		{
+			Thread::Sleep(25);
+		}
+	}
+	
+	delete PMPtr;
 	return 0;
 }
 

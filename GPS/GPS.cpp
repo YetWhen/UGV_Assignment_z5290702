@@ -1,11 +1,11 @@
-#include"VehicleControl.h"
+#include"GPS.h"
 #include"SMObject.h"
-int VC::connect(String^ hostName, int portNumber)
+int GPS::connect(String^ hostName, int portNumber)
 {
 	// YOUR CODE HERE
 	return 1;
 }
-int VC::setupSharedMemory()
+int GPS::setupSharedMemory()
 {
 	//PM Shared Memory
 	ProcessManagementData = new SMObject;
@@ -16,40 +16,40 @@ int VC::setupSharedMemory()
 	PMData = (ProcessManagement*)ProcessManagementData->pData;
 	return 1;
 }
-int VC::getData()
+int GPS::getData()
 {
 	// YOUR CODE HERE
 	return 1;
 }
-int VC::checkData()
+int GPS::checkData()
 {
 	// YOUR CODE HERE
 	return 1;
 }
-int VC::sendDataToSharedMemory()
+int GPS::sendDataToSharedMemory()
 {
 	// YOUR CODE HERE
 	return 1;
 }
-bool VC::getShutdownFlag()
+bool GPS::getShutdownFlag()
 {
 	// YOUR CODE HERE
-	if (PMData->Shutdown.Flags.VehicleControl == 1)
+	if (PMData->Shutdown.Flags.GPS == 1)
 		return 1;
 	else
 		return 0;
 }
-int VC::setHeartbeat(bool Heartbeat)
+int GPS::setHeartbeat(bool Heartbeat)
 {
 	// YOUR CODE HERE
-	PMData->Heartbeat.Flags.VehicleControl = Heartbeat;
+	PMData->Heartbeat.Flags.GPS = Heartbeat;
 	return 1;
 }
-bool VC::getHeartbeat()
+bool GPS::getHeartbeat()
 {
-	return PMData->Heartbeat.Flags.VehicleControl;
+	return PMData->Heartbeat.Flags.GPS;
 }
-VC::~VC()
+GPS::~GPS()
 {
 	// YOUR CODE HERE
 	delete ProcessManagementData;

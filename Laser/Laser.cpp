@@ -7,12 +7,11 @@ int Laser::connect(String^ hostName, int portNumber)
 }
 int Laser::setupSharedMemory()
 {
-	//PM Shared Memory	
-	SMObject PMObj(_TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	ProcessManagementData = &PMObj;
-	//ProcessManagementData->SetSzname(_TEXT("ProcessManagement"));
-	//ProcessManagementData->SetSize(sizeof(ProcessManagement));
-	ProcessManagementData->SMCreate();
+	//PM Shared Memory
+	ProcessManagementData = new SMObject;
+	ProcessManagementData->SetSize(sizeof(ProcessManagement));
+	ProcessManagementData->SetSzname(TEXT("ProcessManagement"));
+	//ProcessManagementData->SMCreate();
 	ProcessManagementData->SMAccess();
 	PMData = (ProcessManagement*) ProcessManagementData->pData;
 	return 1;
@@ -53,8 +52,9 @@ bool Laser::getHeartbeat()
 Laser::~Laser()
 {
 	// YOUR CODE HERE
-	delete[] ProcessManagementData;
-	delete[] SensorData;
+	delete ProcessManagementData;
+	delete SensorData;
+
 }
 
 unsigned long CRC32Value(int i)

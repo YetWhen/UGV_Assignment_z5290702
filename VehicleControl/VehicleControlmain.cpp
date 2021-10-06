@@ -5,7 +5,7 @@
 
 #include "smstructs.h"
 #include "SMObject.h"
-#include "GPS.h"
+#include "VehicleControl.h"
 
 
 using namespace System;
@@ -14,9 +14,9 @@ using namespace System::Threading;
 int main()
 {
 
-	GPS^ GPSModule = gcnew GPS;
+	VC^ VCModule = gcnew VC;
 
-	GPSModule->setupSharedMemory();
+	VCModule->setupSharedMemory();
 
 	int PMcounter = 0;
 
@@ -24,9 +24,9 @@ int main()
 	//main loop, counting time
 	while (1)
 	{
-		if (!GPSModule->getHeartbeat())
+		if (!VCModule->getHeartbeat())
 		{
-			GPSModule->setHeartbeat(1);
+			VCModule->setHeartbeat(1);
 			std::cout << "Turn on heartbeat, PMCounter: " << PMcounter << std::endl;
 			PMcounter = 0;
 		}
@@ -42,14 +42,14 @@ int main()
 
 
 		Thread::Sleep(25);
-		if (GPSModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
+		if (VCModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;
 		if (_kbhit())  //regular shutdown
 			break;
 
 	}
 
-	GPSModule->~GPS();
+	VCModule->~VC();
 
 	return 0;
 }

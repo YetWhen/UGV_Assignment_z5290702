@@ -6,7 +6,7 @@
 unsigned long CRC32Value(int i);
 unsigned long CalculateBlockCRC32(unsigned long ulCount, unsigned char* ucBuffer);
 
-ref class GPS : public UGV_module
+ref class VC : public UGV_module
 {
 
 public:
@@ -26,7 +26,7 @@ public:
 
 	bool getHeartbeat() override;
 
-	~GPS();
+	~VC();
 
 
 

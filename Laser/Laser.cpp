@@ -83,7 +83,14 @@ int Laser::getData()
 }
 int Laser::checkData()
 {
-	return 1;
+	array<wchar_t>^ Space = { ' ' };
+	array<String^>^ StringArray = ResponseData->Split(Space);
+	if (StringArray[1] == "LMDscandata")
+		
+		return 1;
+	else
+		Console::WriteLine(ResponseData);
+		return 0;
 }
 int Laser::sendDataToSharedMemory()
 {	

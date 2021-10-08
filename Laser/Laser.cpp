@@ -63,6 +63,7 @@ int Laser::setupSharedMemory()
 	LaserData = (SM_Laser*) SensorData->pData;
 	return 1;
 }
+//receive binary data from server and transform it into string
 int Laser::getData()
 {
 /*----------------------Laser data interaction---------------------------------*/
@@ -81,6 +82,7 @@ int Laser::getData()
 	/*-------------------------end of Laser data interaction-----------------------*/
 	return 1;
 }
+//check if data is in desired format
 int Laser::checkData()
 {
 	array<wchar_t>^ Space = { ' ' };
@@ -92,6 +94,7 @@ int Laser::checkData()
 		Console::WriteLine(ResponseData);
 		return 0;
 }
+//convert data points to x y coordinates and push into shared memory
 int Laser::sendDataToSharedMemory()
 {	
 	array<wchar_t>^ Space = {' '};

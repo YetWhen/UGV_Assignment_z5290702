@@ -1,5 +1,6 @@
 #include"Laser.h"
 #include"SMObject.h"
+#include<cmath>
 int Laser::connect(String^ hostName, int portNumber) 
 {
 
@@ -107,8 +108,8 @@ int Laser::sendDataToSharedMemory()
 	for (int i = 0; i < NumRanges; i++)
 	{
 		Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
-		LaserData->x[i] = Range[i] * sin(i * Resolution);
-		LaserData->y[i] = Range[i] * cos(i * Resolution);
+		LaserData->x[i] = Range[i] * sin(i * Resolution/360*2*(2*acos(0.0)));
+		LaserData->y[i] = Range[i] * cos(i * Resolution / 360 * 2 * (2 * acos(0.0)));
 		Console::WriteLine("X-coordinate: {0,6:F2} , Y-Coordinate: {1,6:F2}", LaserData->x[i], LaserData->y[i]);
 	}
 	return 1;

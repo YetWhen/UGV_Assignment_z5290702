@@ -2,7 +2,26 @@
 #include"SMObject.h"
 int GPS::connect(String^ hostName, int portNumber)
 {
-	// YOUR CODE HERE
+	// Pointer to TcpClent type object on managed heap
+	TcpClient^ Client;
+
+	// Creat TcpClient object and connect to it, Assignment 1 platform address: "Weeder" 192.168.1.200
+	Client = gcnew TcpClient(hostName, portNumber);
+	// Configure connection
+	Client->NoDelay = true;
+	Client->ReceiveTimeout = 500;//ms
+	Client->SendTimeout = 500;//ms
+	Client->ReceiveBufferSize = 224;
+	Client->SendBufferSize = 1024;
+
+	ReadData = gcnew array<unsigned char>(224);
+	DataFitter = new GPSData;
+
+	// Get the network streab object associated with clien so we 
+	// can use it to read and write
+	Stream = Client->GetStream();
+
+
 	return 1;
 }
 int GPS::setupSharedMemory()
@@ -18,7 +37,36 @@ int GPS::setupSharedMemory()
 }
 int GPS::getData()
 {
-	// YOUR CODE HERE
+	unsigned int Header = 0;
+	unsigned char Data;
+	unsigned char* BytePtr = nullptr;
+	BytePtr = (unsigned char*) DataFitter;
+	int i = 0;
+	int Start;
+	/*----------------------------Get Binary stream-------------------------------*/
+	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
+	System::Threading::Thread::Sleep(1000);
+	// Read the incoming data
+	Stream->Read(ReadData, 0, ReadData->Length);
+	// Print the received string on the screen
+	Console::WriteLine(ReadData);
+	/*----------------------------------------------------------------------------*/
+	/*-----------------------------Find Header------------------------------------*/
+	do
+	{
+		Data = ReadData[i++];
+		Header = ((Header << 8) | Data);
+	} 
+	while (Header != 0xaa44121c);
+	Start = i - 4;
+	/*----------------------------------------------------------------------------*/
+	/*-----------------------------Filling Struct---------------------------------*/
+	for (i = Start; i < Start + sizeof(GPSData); i++)
+	{
+		*(BytePtr++) = ReadData[i];
+	}
+	std::cout <<std::hex<< DataFitter->Header << " " << DataFitter->Easting << std::endl;
+	/*----------------------------------------------------------------------------*/
 	return 1;
 }
 int GPS::checkData()
@@ -54,6 +102,7 @@ GPS::~GPS()
 	// YOUR CODE HERE
 	delete ProcessManagementData;
 	delete SensorData;
+	delete DataFitter;
 
 }
 

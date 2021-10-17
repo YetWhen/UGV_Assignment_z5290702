@@ -1,5 +1,6 @@
 #include"GPS.h"
 #include"SMObject.h"
+
 int GPS::connect(String^ hostName, int portNumber)
 {
 	// Pointer to TcpClent type object on managed heap
@@ -65,7 +66,9 @@ int GPS::getData()
 	{
 		*(BytePtr++) = ReadData[i];
 	}
-	std::cout <<std::hex<< DataFitter->Header << " " << DataFitter->Easting << std::endl;
+
+	std::cout << DataFitter->Header << " ";
+	std::cout << DataFitter->Northing << std::endl;
 	/*----------------------------------------------------------------------------*/
 	return 1;
 }

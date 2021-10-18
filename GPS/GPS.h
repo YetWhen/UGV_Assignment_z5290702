@@ -1,6 +1,6 @@
 #include <UGV_module.h>
 #include <smstructs.h>
-
+#pragma pack(1)
 #define CRC32_POLYNOMIAL 0xEDB88320L
 
 unsigned long CRC32Value(int i);

@@ -49,8 +49,6 @@ int GPS::getData()
 	System::Threading::Thread::Sleep(1000);
 	// Read the incoming data
 	Stream->Read(ReadData, 0, ReadData->Length);
-	// Print the received string on the screen
-	Console::WriteLine(ReadData);
 	/*----------------------------------------------------------------------------*/
 	/*-----------------------------Find Header------------------------------------*/
 	do
@@ -67,8 +65,11 @@ int GPS::getData()
 		*(BytePtr++) = ReadData[i];
 	}
 
-	std::cout << DataFitter->Header << " ";
-	std::cout << DataFitter->Northing << std::endl;
+	std::cout << "Header: "<<std::hex<<DataFitter->Header << std::endl;
+	std::cout << "Northing: "<< DataFitter->Northing << std::endl;
+	std::cout << "Easting: " << DataFitter->Easting << std::endl;
+	std::cout << "Height: " << DataFitter->Height << std::endl;
+	std::cout << "CRC: " << DataFitter->CRC << std::endl<<std::endl;
 	/*----------------------------------------------------------------------------*/
 	return 1;
 }

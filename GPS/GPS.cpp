@@ -43,7 +43,6 @@ int GPS::getData()
 	unsigned char* BytePtr = nullptr;
 	BytePtr = (unsigned char*) DataFitter;
 	int i = 0;
-	int Start;
 	/*----------------------------Get Binary stream-------------------------------*/
 	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
 	System::Threading::Thread::Sleep(1000);
@@ -69,14 +68,20 @@ int GPS::getData()
 	std::cout << "Northing: "<< DataFitter->Northing << std::endl;
 	std::cout << "Easting: " << DataFitter->Easting << std::endl;
 	std::cout << "Height: " << DataFitter->Height << std::endl;
-	std::cout << "CRC: " << DataFitter->CRC << std::endl<<std::endl;
+	std::cout << "CRC: " << DataFitter->CRC << std::endl;
 	/*----------------------------------------------------------------------------*/
 	return 1;
 }
 int GPS::checkData()
 {
-	// YOUR CODE HERE
-	return 1;
+	unsigned char Buffer[sizeof(GPSData)];
+	for (int i = Start; i < Start + sizeof(GPSData); i++)
+	{
+		Buffer[i] = ReadData[i];
+	}
+	int CalculatedCRC = CalculateBlockCRC32(108, Buffer);
+	std::cout << "CRC: " << CalculatedCRC << std::endl << std::endl;
+	return (CalculatedCRC == DataFitter->CRC);
 }
 int GPS::sendDataToSharedMemory()
 {

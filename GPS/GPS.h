@@ -43,5 +43,6 @@ protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
 	ProcessManagement* PMData;
 	GPSData* DataFitter;
+	int Start;
 };
 

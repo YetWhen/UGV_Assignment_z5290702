@@ -1,6 +1,5 @@
 #include"GPS.h"
 #include"SMObject.h"
-
 int GPS::connect(String^ hostName, int portNumber)
 {
 	// Pointer to TcpClent type object on managed heap
@@ -34,6 +33,13 @@ int GPS::setupSharedMemory()
 	//ProcessManagementData->SMCreate();
 	ProcessManagementData->SMAccess();
 	PMData = (ProcessManagement*)ProcessManagementData->pData;
+
+	//GPS Shared Memory
+	SensorData = new SMObject;
+	SensorData->SetSize(sizeof(SM_GPS));
+	SensorData->SetSzname(TEXT("SM_GPS"));
+	SensorData->SMAccess();
+	SM_GPSData = (SM_GPS*)SensorData->pData;
 	return 1;
 }
 int GPS::getData()
@@ -63,11 +69,6 @@ int GPS::getData()
 	{
 		*(BytePtr++) = ReadData[i];
 	}
-
-	std::cout << "Header: "<<std::hex<<DataFitter->Header << std::endl;
-	std::cout << "Northing: "<< DataFitter->Northing << std::endl;
-	std::cout << "Easting: " << DataFitter->Easting << std::endl;
-	std::cout << "Height: " << DataFitter->Height << std::endl;
 	std::cout << "CRC: " << DataFitter->CRC << std::endl;
 	/*----------------------------------------------------------------------------*/
 	return 1;
@@ -80,12 +81,19 @@ int GPS::checkData()
 		Buffer[i] = ReadData[i];
 	}
 	int CalculatedCRC = CalculateBlockCRC32(108, Buffer);
-	std::cout << "CRC: " << CalculatedCRC << std::endl << std::endl;
+	std::cout << "CalculatedCRC: " << CalculatedCRC << std::endl;
 	return (CalculatedCRC == DataFitter->CRC);
 }
 int GPS::sendDataToSharedMemory()
 {
-	// YOUR CODE HERE
+	SM_GPSData->easting = DataFitter->Easting;
+	SM_GPSData->northing = DataFitter->Northing;
+	SM_GPSData->height = DataFitter->Height;
+	std::cout << "Header: " << std::hex << DataFitter->Header << std::endl;
+	std::cout << "Northing: " << DataFitter->Northing << std::endl;
+	std::cout << "Easting: " << DataFitter->Easting << std::endl;
+	std::cout << "Height: " << DataFitter->Height << std::endl<< std::endl;
+
 	return 1;
 }
 bool GPS::getShutdownFlag()

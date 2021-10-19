@@ -40,7 +40,10 @@ int main()
 			}
 		}
 		GPSModule->getData();
-		GPSModule->checkData();
+		if (GPSModule->checkData())
+		{
+			GPSModule->sendDataToSharedMemory();
+		}
 		Thread::Sleep(25);
 		if (GPSModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;

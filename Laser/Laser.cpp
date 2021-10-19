@@ -59,7 +59,7 @@ int Laser::setupSharedMemory()
 	SensorData = new SMObject;
 	SensorData->SetSize(sizeof(SM_Laser));
 	SensorData->SetSzname(TEXT("SM_Laser"));
-	SensorData->SMCreate();
+	//SensorData->SMCreate();
 	SensorData->SMAccess();
 	LaserData = (SM_Laser*) SensorData->pData;
 	return 1;

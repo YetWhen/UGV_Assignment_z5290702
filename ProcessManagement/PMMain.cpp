@@ -40,8 +40,14 @@ int main()
 {
 	//declare shared memory
 	SMObject PMObj(_TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	SMObject GPSObj(_TEXT("SM_GPS"), sizeof(SM_GPS));
+	SMObject LaserObj(_TEXT("SM_Laser"), sizeof(SM_Laser));
 	SMObject* PMPtr = new SMObject;
+	SMObject* GPSPtr = new SMObject;
+	SMObject* LaserPtr = new SMObject;
 	*PMPtr = PMObj;
+	*GPSPtr = GPSObj;
+	*LaserPtr = LaserObj;
 	/*-------------------------------------------------------------------*/
 	//Teleoperation
 	// 
@@ -54,10 +60,13 @@ int main()
 	
 
 	/*-------------------------------------------------------------------*/
-
+	//note that PM need to access all the module's shared memory to be able to delete them
 	PMPtr->SMCreate();
 	PMPtr->SMAccess();
-
+	GPSPtr->SMCreate();
+	GPSPtr->SMAccess();
+	LaserPtr->SMCreate();
+	LaserPtr->SMAccess();
 	ProcessManagement* PMData = new ProcessManagement;
 	PMData = (ProcessManagement*) PMPtr->pData;
 	PMData->Shutdown.Status = 0x00;
@@ -142,8 +151,12 @@ int main()
 			Thread::Sleep(25);
 		}
 	}
-	
+
 	delete PMPtr;
+	delete PMData;
+	delete LaserPtr;
+	delete GPSPtr;
+
 	return 0;
 }
 

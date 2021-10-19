@@ -13,7 +13,7 @@ int Laser::connect(String^ hostName, int portNumber)
 	String^ AskScan = gcnew String("sRN LMDscandata");
 
 	// Creat TcpClient object and connect to it, Assignment 1 platform address: "Weeder" 192.168.1.200
-	Client = gcnew TcpClient("192.168.1.200", portNumber);
+	Client = gcnew TcpClient(hostName, portNumber);
 	// Configure connection
 	Client->NoDelay = true;
 	Client->ReceiveTimeout = 500;//ms
@@ -30,7 +30,7 @@ int Laser::connect(String^ hostName, int portNumber)
 	// can use it to read and write
 	Stream = Client->GetStream();
 	/*----------------------------------------------------------------*/
-	SendData = System::Text::Encoding::ASCII->GetBytes(hostName);
+	SendData = System::Text::Encoding::ASCII->GetBytes("z5290702\n");
 	// Authenticate the user
 	Stream->Write(SendData, 0, SendData->Length);
 	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
@@ -59,7 +59,7 @@ int Laser::setupSharedMemory()
 	SensorData = new SMObject;
 	SensorData->SetSize(sizeof(SM_Laser));
 	SensorData->SetSzname(TEXT("SM_Laser"));
-	//SensorData->SMCreate();
+	SensorData->SMCreate();
 	SensorData->SMAccess();
 	LaserData = (SM_Laser*) SensorData->pData;
 	return 1;

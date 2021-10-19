@@ -30,24 +30,18 @@ TCHAR Units[10][20] =                           //array of .exe file names for m
 	TEXT("GPS.exe"),
 	TEXT("Camera.exe")
 };
-	struct GPS                                   //latitude and longitude, SM_GPS has nothing easting height
-	{
-		double Lat;
-		double Long;
-		char Header[4];
-	};
+struct GPS                                   //latitude and longitude, SM_GPS has nothing easting height
+{
+	double Lat;
+	double Long;
+	char Header[4];
+};
 int main()
 {
 	//declare shared memory
 	SMObject PMObj(_TEXT("ProcessManagement"), sizeof(ProcessManagement));
-	SMObject GPSObj(_TEXT("SM_GPS"), sizeof(SM_GPS));
-	SMObject LaserObj(_TEXT("SM_Laser"), sizeof(SM_Laser));
 	SMObject* PMPtr = new SMObject;
-	SMObject* GPSPtr = new SMObject;
-	SMObject* LaserPtr = new SMObject;
 	*PMPtr = PMObj;
-	*GPSPtr = GPSObj;
-	*LaserPtr = LaserObj;
 	/*-------------------------------------------------------------------*/
 	//Teleoperation
 	// 
@@ -57,41 +51,38 @@ int main()
 	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 1, 3, 1, 3, 1000 };
 
 	unsigned char shutdown = 0;
-	
+
 
 	/*-------------------------------------------------------------------*/
-	//note that PM need to access all the module's shared memory to be able to delete them
+
 	PMPtr->SMCreate();
 	PMPtr->SMAccess();
-	GPSPtr->SMCreate();
-	GPSPtr->SMAccess();
-	LaserPtr->SMCreate();
-	LaserPtr->SMAccess();
+
 	ProcessManagement* PMData = new ProcessManagement;
-	PMData = (ProcessManagement*) PMPtr->pData;
+	PMData = (ProcessManagement*)PMPtr->pData;
 	PMData->Shutdown.Status = 0x00;
 	//start all 5 modules, replacing the lecture Process handle operation codes
 	StartProcesses();
-	while (!_kbhit()) 
+	while (!_kbhit())
 	{
 		//refresh PMTimeStamp (relative);
-		
-		
-		 
-		
-		 
+
+
+
+
+
 		//check for heartbeats
 			//iterate through all processes
 			//if true, turn the bit of process[i] off
-		    //if false, increase heartbeat lost counter (life counter)
-		        //check if counter passes limit for process[i]                 have a limit array corresponding to i th process
-		        //if passed, is process critical                               have a critical array to compare
+			//if false, increase heartbeat lost counter (life counter)
+				//check if counter passes limit for process[i]                 have a limit array corresponding to i th process
+				//if passed, is process critical                               have a critical array to compare
 					//true, shutdown all                                       shutdown=0xFF
 					//false, has process exited?                               use modulelist to check
 						//true, start()                                        use modulelist and Process
 						//false, kill() then start().
-		        //if didn't pass limit, increase the counter for process[i]
-		
+				//if didn't pass limit, increase the counter for process[i]
+
 		for (int i = 0; i < NUM_UNITS; i++)
 		{
 			//PMData->Heartbeat.Status & (1<<i)     
@@ -100,10 +91,10 @@ int main()
 
 			if (PMData->Heartbeat.Status & (1 << i))
 			{
-				
+
 				PMData->Heartbeat.Status = PMData->Heartbeat.Status & (~(1 << i));  //turn i th bit to 0, turning off heartbeat
 				PMData->LifeCounter[i] = 0;
-			
+
 
 			}
 			else
@@ -115,7 +106,7 @@ int main()
 					if (Critical[i])
 					{
 						PMData->Shutdown.Status = 0xFF;
-						std::cout << "Critical process " << Units[i] << " failed, exit." <<PMData->LifeCounter[i]<<" "<<(int)PMData->Heartbeat.Flags.Display << std::endl;
+						std::cout << "Critical process " << Units[i] << " failed, exit." << PMData->LifeCounter[i] << " " << (int)PMData->Heartbeat.Flags.Display << std::endl;
 						shutdown = 1;
 						getch();
 						break;
@@ -131,21 +122,21 @@ int main()
 					}
 				}
 			}
-			
+
 		}
-		    
-		Thread::Sleep(1000);	
+
+		Thread::Sleep(1000);
 		if (shutdown) {
 			break;
 		}
-		
+
 	}
 
 	//routine shutdown
 
 	PMData->Shutdown.Status = 0xFF;
-	for(int i = 0; i<NUM_UNITS ; i++)
-	{ 
+	for (int i = 0; i < NUM_UNITS; i++)
+	{
 		while (IsProcessRunning(Units[i]))
 		{
 			Thread::Sleep(25);
@@ -153,10 +144,6 @@ int main()
 	}
 
 	delete PMPtr;
-	delete PMData;
-	delete LaserPtr;
-	delete GPSPtr;
-
 	return 0;
 }
 
@@ -172,7 +159,7 @@ bool IsProcessRunning(const char* processName)
 
 	if (Process32First(snapshot, &entry))
 		while (Process32Next(snapshot, &entry))
-			if (!_stricmp((const char *)entry.szExeFile, processName))
+			if (!_stricmp((const char*)entry.szExeFile, processName))
 				exists = true;
 
 	CloseHandle(snapshot);
@@ -187,7 +174,7 @@ void StartProcesses()
 
 	for (int i = 0; i < NUM_UNITS; i++)               //loop NUM_UNIT times to check if correct number of modules are running
 	{
-		if (!IsProcessRunning((const char *)Units[i]))
+		if (!IsProcessRunning((const char*)Units[i]))
 		{
 			ZeroMemory(&s[i], sizeof(s[i]));
 			s[i].cb = sizeof(s[i]);
@@ -232,7 +219,7 @@ void Restart1Process(int i)
 	}
 	std::cout << "Restarted: " << Units[i] << std::endl;   //this function is only used in restarting process
 	Sleep(100);
-/*	// Close process and thread handles. 
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread); */
+	/*	// Close process and thread handles.
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread); */
 }

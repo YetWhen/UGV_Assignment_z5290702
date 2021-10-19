@@ -23,7 +23,7 @@ int main()
 	Laser ^ LaserModule = gcnew Laser;
 
 	LaserModule->setupSharedMemory();
-	LaserModule->connect("z5290702\n",23000);
+	LaserModule->connect("192.168.1.200",23000);
 	int PMcounter = 0;
 
 	

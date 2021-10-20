@@ -210,6 +210,7 @@ void idle() {
 	speed = 0;
 	steering = 0;
 
+	//get the motion command information from keyboard, send them to the VehicleControl module
 	if (KeyManager::get()->isSpecialKeyPressed(GLUT_KEY_LEFT)) {
 		steering = Vehicle::MAX_LEFT_STEERING_DEGS * -1;
 	}

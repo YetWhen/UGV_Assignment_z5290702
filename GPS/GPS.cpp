@@ -118,6 +118,8 @@ bool GPS::getHeartbeat()
 GPS::~GPS()
 {
 	// YOUR CODE HERE
+	Stream->Close();
+	Client->Close();
 	delete ProcessManagementData;
 	delete SensorData;
 	delete DataFitter;

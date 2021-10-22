@@ -47,7 +47,7 @@ int main()
 	// 
 	//create an array of module names and a critical list in its corresponding order.
 	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
-	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 0 };      //11100
+	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 1 }; 
 	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 1, 3, 1, 3, 1000 };
 
 	unsigned char shutdown = 0;

@@ -38,7 +38,7 @@ int GPS::setupSharedMemory()
 	SensorData = new SMObject;
 	SensorData->SetSize(sizeof(SM_GPS));
 	SensorData->SetSzname(TEXT("SM_GPS"));
-	SensorData->SMCreate();
+	//SensorData->SMCreate();
 	SensorData->SMAccess();
 	SM_GPSData = (SM_GPS*)SensorData->pData;
 	return 1;

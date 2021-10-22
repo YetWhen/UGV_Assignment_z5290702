@@ -67,17 +67,29 @@ double steering = 0;
 
 //process management related pointer
 ProcessManagement* PMData = NULL;
+SM_GPS* GPSData = NULL;
+SM_Laser* LaserData = NULL;
+SM_VehicleControl* VCData = NULL;
 //PM counter
 int PMCounter = 0;
 //int _tmain(int argc, _TCHAR* argv[]) {
 int main(int argc, char** argv) {
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
+	SMObject GPSObj(TEXT("SM_GPS"), sizeof(SM_GPS));
+	SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
-	//processmanagement
+	//greate shared memory
 	//PMObj.SMCreate();
 	PMObj.SMAccess();
+	GPSObj.SMCreate();
+	GPSObj.SMAccess();
+	LaserObj.SMAccess();
+
+
 	PMData = (ProcessManagement*)PMObj.pData;
+	GPSData = (SM_GPS*)GPSObj.pData;
+	LaserData = (SM_Laser*)LaserObj.pData;
 
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -108,8 +120,6 @@ int main(int argc, char** argv) {
 	//   custom vehicle.
 	// -------------------------------------------------------------------------
 	vehicle = new MyVehicle();
-
-
 	glutMainLoop();
 
 	if (vehicle != NULL) {
@@ -141,13 +151,30 @@ void display() {
 
 	Ground::draw();
 
+	// laser data points
+	glColor3f(1, 1, 1);
+	float data[2][3] = { { 3.0,   .4 + 1,    0.4 }, //{front distance/y-axis front+,z axis height, side distance/x-axis right+} meter
+							{ 3.0,   .4 + 0.3,    0.4 } };
+
+	for (int i = 0; i < 361; i++)
+	{
+		data[0][0] = LaserData->x[i];
+		data[1][0] = LaserData->x[i];
+		data[0][2] = LaserData->y[i];
+		data[1][2] = LaserData->y[i];
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(data[0]);
+		glVertex3fv(data[1]);
+		glEnd();
+	}
 	// draw my vehicle
 	if (vehicle != NULL) {
 		vehicle->draw();
 
 	}
 
-
+	// send GPSData to HUD
+	HUD::getGPS(GPSData);
 	// draw HUD
 	HUD::Draw();
 
@@ -234,12 +261,11 @@ void idle() {
 		std::cout << "turn up heartbeat: " << (int)PMData->Heartbeat.Flags.Display <<" PMCounter: " << PMCounter<< std::endl;
 		PMCounter = 0;
 	}
-	//else 
 	else
 	{
 		PMCounter++;
 		if (PMCounter > 40)
-			PMData->Shutdown.Status = 0xFF;
+		PMData->Shutdown.Status = 0xFF;
 	}
 	if (PMData->Shutdown.Flags.Display)   //emergency shutdown controlled by shared memory
 	{

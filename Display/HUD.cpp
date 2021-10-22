@@ -32,6 +32,7 @@ extern Vehicle * vehicle;
 
 using namespace scos;
 
+SM_GPS* GPSinput = NULL;
 
 void HUD::RenderString(const char * str, int x, int y, void * font) 
 {
@@ -144,7 +145,11 @@ void HUD::Draw()
 	int winWidthOff = (Camera::get()->getWindowWidth() - 800) * .5;
 	if(winWidthOff < 0)
 		winWidthOff = 0;
-
+	/*----------------------------Draw GPS data--------------------------------*/
+	char GPStxt[60];
+	sprintf(GPStxt, "Northing: %.2f Easting: %.2f Height: %.2f", GPSinput->northing, GPSinput->easting, GPSinput->height);
+	RenderString(GPStxt, 0.0, 20, GLUT_BITMAP_HELVETICA_18);  //print the text in window
+	/*-------------------------------------------------------------------------*/
 	if(vehicle) {
 		glColor3f(1, 0, 0);
 		DrawGauge(200+winWidthOff, 280, 210, -1, 1, vehicle->getSpeed(), "Speed");
@@ -153,4 +158,8 @@ void HUD::Draw()
 	}
 
 	Camera::get()->switchTo3DDrawing();
+}
+void HUD::getGPS(SM_GPS* GPSData) 
+{
+	GPSinput = GPSData;
 }

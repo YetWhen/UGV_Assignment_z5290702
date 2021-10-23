@@ -140,7 +140,22 @@ void MyVehicle::draw()
 {
 	glPushMatrix();
 	positionInGL();
-	
+	// laser data points
+	glColor3f(1, 1, 1);
+	float data[2][3] = { { 3.0,   .4 + 1,    0.4 }, //{front distance/y-axis front+,z axis height, side distance/x-axis right+} meter
+							{ 3.0,   .4 + 0.3,    0.4 } };
+
+	for (int i = 0; i < 361; i++)
+	{
+		data[0][0] = LaserData.x[i] / 1000;
+		data[1][0] = LaserData.x[i] / 1000;
+		data[0][2] = LaserData.y[i] / 1000;
+		data[1][2] = LaserData.y[i] / 1000;
+		glBegin(GL_LINE_STRIP);
+		glVertex3fv(data[0]);
+		glVertex3fv(data[1]);
+		glEnd();
+	}
 	drawUGV(steering);
 
 	glPopMatrix();

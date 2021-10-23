@@ -55,3 +55,7 @@ double clamp(double a, double n, double b) {
 
 };
 
+void Vehicle::getLaser(SM_Laser LaserInput) 
+{
+	LaserData = LaserInput;
+}

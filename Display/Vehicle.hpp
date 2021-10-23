@@ -7,6 +7,8 @@
 #include "VectorMaths.hpp"
 #include <vector>
 
+#include <smstructs.h>
+
 class Vehicle : public Shape {
 public:
 
@@ -27,9 +29,12 @@ public:
 	double getSpeed() const { return speed; }
 	double getSteering() const { return steering; }
 
+	void getLaser(SM_Laser);
+
 protected:
 	double speed;     // m/s
 	double steering;  // degrees
+	SM_Laser LaserData;
 
 };
 

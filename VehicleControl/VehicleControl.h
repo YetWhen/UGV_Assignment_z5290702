@@ -35,5 +35,5 @@ protected:
 	ProcessManagement* PMData;
 	SM_VehicleControl* VCData;
 	array<unsigned char>^ SendData;
-	bool flag;
+	int flag;
 };

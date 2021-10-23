@@ -39,16 +39,25 @@ int VC::setupSharedMemory()
 }
 int VC::getData()
 {
-	char buffer[16];
+	char asciiFlag = '1';
 	//toggle the flag between 1 and 0
-	flag = ~flag;
+	if (flag == 1) {
+		flag = 0;
+		asciiFlag = '0';
+	}
+	else {
+		flag = 1;
+		asciiFlag = '1';
+	}
 	// Convert string command to an array of unsigned char
-	sprintf(buffer, "# %f %f %b #", VCData->Steering, VCData->Speed, flag);
+	/*sprintf(buffer, "# %f %f %b #", VCData->Steering, VCData->Speed, flag);
 	for (int i = 0; i < 16; i++)
 	{
 		SendData[i] = buffer[i];
-	}
-	Stream->Write(SendData, 0, 16);
+	}*/
+	if(VCData->Steering <= 40 && VCData->Steering >= -40 && VCData->Speed<=1 && VCData->Speed>=-1)
+	SendData = System::Text::Encoding::ASCII->GetBytes("# "+VCData->Steering + " "+VCData->Speed+" "+asciiFlag+" #");
+	Stream->Write(SendData, 0, SendData->Length);
 	return 1;
 }
 int VC::checkData()

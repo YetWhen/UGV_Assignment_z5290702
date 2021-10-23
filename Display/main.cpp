@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
 	SMObject PMObj(TEXT("ProcessManagement"), sizeof(ProcessManagement));
 	SMObject GPSObj(TEXT("SM_GPS"), sizeof(SM_GPS));
 	SMObject LaserObj(TEXT("SM_Laser"), sizeof(SM_Laser));
+	SMObject VCObj(TEXT("SM_VehicleControl"), sizeof(SM_VehicleControl));
 	const int WINDOW_WIDTH = 800;
 	const int WINDOW_HEIGHT = 600;
 	//greate shared memory
@@ -85,11 +86,14 @@ int main(int argc, char** argv) {
 	GPSObj.SMCreate();
 	GPSObj.SMAccess();
 	LaserObj.SMAccess();
+	VCObj.SMCreate();
+	VCObj.SMAccess();
 
 
 	PMData = (ProcessManagement*)PMObj.pData;
 	GPSData = (SM_GPS*)GPSObj.pData;
 	LaserData = (SM_Laser*)LaserObj.pData;
+	VCData = (SM_VehicleControl*)VCObj.pData;
 
 	glutInit(&argc, (char**)(argv));
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -122,6 +126,7 @@ int main(int argc, char** argv) {
 	vehicle = new MyVehicle();
 	glutMainLoop();
 
+	System::Threading::Thread::Sleep(500);
 	if (vehicle != NULL) {
 		delete vehicle;
 	}
@@ -271,8 +276,10 @@ void idle() {
 	{
 		exit(0);
 	}
-	//-------------------------------------------------------------------------------------------------------
-
+	//--------------------VC--------------------------------------------------------------------------------
+	VCData->Speed = speed;
+	VCData->Steering = steering;
+	//------------------------------------------------------------------------------------------------------
 
 	const float sleep_time_between_frames_in_seconds = 0.025;
 

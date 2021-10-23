@@ -2,7 +2,22 @@
 #include"SMObject.h"
 int VC::connect(String^ hostName, int portNumber)
 {
-	// YOUR CODE HERE
+	// Pointer to TcpClent type object on managed heap
+	TcpClient^ Client;
+
+	// Creat TcpClient object and connect to it, Assignment 1 platform address: "Weeder" 192.168.1.200
+	Client = gcnew TcpClient(hostName, portNumber);
+	// Configure connection
+	Client->NoDelay = true;
+	Client->ReceiveTimeout = 500;//ms
+	Client->SendTimeout = 500;//ms
+	Client->ReceiveBufferSize = 1024;
+	Client->SendBufferSize = 1024;
+	// Get the network streab object associated with clien so we 
+	// can use it to read and write
+	Stream = Client->GetStream();
+	SendData = gcnew array<unsigned char>(16);
+
 	return 1;
 }
 int VC::setupSharedMemory()
@@ -14,11 +29,26 @@ int VC::setupSharedMemory()
 	//ProcessManagementData->SMCreate();
 	ProcessManagementData->SMAccess();
 	PMData = (ProcessManagement*)ProcessManagementData->pData;
+
+	SensorData = new SMObject;
+	SensorData->SetSize(sizeof(SM_VehicleControl));
+	SensorData->SetSzname(TEXT("SM_VehicleControl"));
+	SensorData->SMAccess();
+	VCData = (SM_VehicleControl*)SensorData->pData;
 	return 1;
 }
 int VC::getData()
 {
-	// YOUR CODE HERE
+	char buffer[16];
+	//toggle the flag between 1 and 0
+	flag = ~flag;
+	// Convert string command to an array of unsigned char
+	sprintf(buffer, "# %f %f %b #", VCData->Steering, VCData->Speed, flag);
+	for (int i = 0; i < 16; i++)
+	{
+		SendData[i] = buffer[i];
+	}
+	Stream->Write(SendData, 0, 16);
 	return 1;
 }
 int VC::checkData()
@@ -51,9 +81,11 @@ bool VC::getHeartbeat()
 }
 VC::~VC()
 {
-	// YOUR CODE HERE
+	Client->Close();
+	Stream->Close();
 	delete ProcessManagementData;
 	delete SensorData;
+
 
 }
 

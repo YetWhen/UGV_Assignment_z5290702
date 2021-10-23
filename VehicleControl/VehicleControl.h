@@ -14,7 +14,7 @@ public:
 
 	int setupSharedMemory() override;  // Create and access shared memory objects
 
-	int getData() override;    // Get data from sensor (GPS / Laser)
+	int getData() override;    // Get data from shared memory and send to server
 
 	int checkData() override;  // Check Data is correct (eg headers)
 
@@ -33,4 +33,7 @@ public:
 protected:
 	// YOUR CODE HERE (ADDITIONAL MEMBER VARIABLES THAT YOU MAY WANT TO ADD)
 	ProcessManagement* PMData;
+	SM_VehicleControl* VCData;
+	array<unsigned char>^ SendData;
+	bool flag;
 };

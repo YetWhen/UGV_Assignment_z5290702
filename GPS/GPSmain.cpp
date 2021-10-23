@@ -17,7 +17,7 @@ int main()
 	GPS^ GPSModule = gcnew GPS;
 
 	GPSModule->setupSharedMemory();
-	//GPSModule->connect("192.168.1.200", 24000);
+	GPSModule->connect("192.168.1.200", 24000);
 	int PMcounter = 0;
 
 
@@ -39,11 +39,11 @@ int main()
 				break;
 			}
 		}
-		//GPSModule->getData();
-		//if (GPSModule->checkData())
-		//{
+		GPSModule->getData();
+		if (GPSModule->checkData())
+		{
 			GPSModule->sendDataToSharedMemory();
-		//}
+		}
 		Thread::Sleep(25);
 		if (GPSModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;

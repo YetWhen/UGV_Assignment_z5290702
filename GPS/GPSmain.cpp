@@ -52,7 +52,6 @@ int main()
 
 	}
 
-	GPSModule->~GPS();
 
 	return 0;
 }

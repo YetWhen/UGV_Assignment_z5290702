@@ -17,7 +17,7 @@ int main()
 	VC^ VCModule = gcnew VC;
 
 	VCModule->setupSharedMemory();
-	VCModule->connect("192.168.1.200", 25000);
+	//VCModule->connect("192.168.1.200", 25000);
 	int PMcounter = 0;
 
 
@@ -39,7 +39,7 @@ int main()
 				break;
 			}
 		}
-		VCModule->getData();
+		//VCModule->getData();
 
 		Thread::Sleep(25);
 		if (VCModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
@@ -49,7 +49,6 @@ int main()
 
 	}
 
-	VCModule->~VC();
 
 	return 0;
 }

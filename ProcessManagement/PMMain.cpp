@@ -15,7 +15,7 @@ using namespace System::Net;
 using namespace System::Text;
 using namespace System::Threading;
 
-#define NUM_UNITS  5                          //how many modules you set up
+#define NUM_UNITS  2                          //how many modules you set up
 
 bool IsProcessRunning(const char* processName);
 void StartProcesses();

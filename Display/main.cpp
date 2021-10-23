@@ -89,7 +89,6 @@ int main(int argc, char** argv) {
 	VCObj.SMCreate();
 	VCObj.SMAccess();
 
-
 	PMData = (ProcessManagement*)PMObj.pData;
 	GPSData = (SM_GPS*)GPSObj.pData;
 	LaserData = (SM_Laser*)LaserObj.pData;
@@ -126,7 +125,6 @@ int main(int argc, char** argv) {
 	vehicle = new MyVehicle();
 	glutMainLoop();
 
-	System::Threading::Thread::Sleep(500);
 	if (vehicle != NULL) {
 		delete vehicle;
 	}
@@ -157,16 +155,17 @@ void display() {
 	Ground::draw();
 
 	// laser data points
+	std::cout <<(LaserData == NULL) << " " << LaserData->x[2] << std::endl;
 	glColor3f(1, 1, 1);
 	float data[2][3] = { { 3.0,   .4 + 1,    0.4 }, //{front distance/y-axis front+,z axis height, side distance/x-axis right+} meter
 							{ 3.0,   .4 + 0.3,    0.4 } };
 
 	for (int i = 0; i < 361; i++)
 	{
-		data[0][0] = LaserData->x[i];
-		data[1][0] = LaserData->x[i];
-		data[0][2] = LaserData->y[i];
-		data[1][2] = LaserData->y[i];
+		data[0][0] = LaserData->x[i]/1000;
+		data[1][0] = LaserData->x[i]/1000;
+		data[0][2] = LaserData->y[i]/1000;
+		data[1][2] = LaserData->y[i]/1000;
 		glBegin(GL_LINE_STRIP);
 		glVertex3fv(data[0]);
 		glVertex3fv(data[1]);

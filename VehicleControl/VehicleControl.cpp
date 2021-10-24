@@ -17,7 +17,18 @@ int VC::connect(String^ hostName, int portNumber)
 	// can use it to read and write
 	Stream = Client->GetStream();
 	SendData = gcnew array<unsigned char>(16);
-
+	String^ ResponseData;
+	SendData = System::Text::Encoding::ASCII->GetBytes("z5290702\n");
+	// Authenticate the user
+	Stream->Write(SendData, 0, SendData->Length);
+	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
+	System::Threading::Thread::Sleep(10);
+	// Read the incoming data
+	Stream->Read(ReadData, 0, ReadData->Length);
+	// Convert incoming data from an array of unsigned char bytes to an ASCII string
+	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
+	// Print the received string on the screen
+	//Console::WriteLine(ResponseData);
 	return 1;
 }
 int VC::setupSharedMemory()

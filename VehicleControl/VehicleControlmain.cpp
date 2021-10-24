@@ -27,7 +27,7 @@ int main()
 		if (!VCModule->getHeartbeat())
 		{
 			VCModule->setHeartbeat(1);
-			std::cout << "Turn on heartbeat, PMCounter: " << PMcounter << std::endl;
+			//std::cout << "Turn on heartbeat, PMCounter: " << PMcounter << std::endl;
 			PMcounter = 0;
 		}
 		else

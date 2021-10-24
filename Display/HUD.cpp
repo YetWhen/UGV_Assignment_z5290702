@@ -147,7 +147,7 @@ void HUD::Draw()
 		winWidthOff = 0;
 	/*----------------------------Draw GPS data--------------------------------*/
 	char GPStxt[60];
-	sprintf(GPStxt, "Northing: %.2f Easting: %.2f Height: %.2f", GPSinput->northing, GPSinput->easting, GPSinput->height);
+	sprintf(GPStxt, "Northing: %f Easting: %f Height: %f", GPSinput->northing, GPSinput->easting, GPSinput->height);
 	RenderString(GPStxt, 0.0, 20, GLUT_BITMAP_HELVETICA_18);  //print the text in window
 	/*-------------------------------------------------------------------------*/
 	if(vehicle) {

@@ -17,8 +17,8 @@ int VC::connect(String^ hostName, int portNumber)
 	// can use it to read and write
 	Stream = Client->GetStream();
 	SendData = gcnew array<unsigned char>(16);
-
-	/*String^ ResponseData;
+	ReadData = gcnew array<unsigned char>(16);
+	String^ ResponseData;
 	SendData = System::Text::Encoding::ASCII->GetBytes("z5290702\n");
 	// Authenticate the user
 	Stream->Write(SendData, 0, SendData->Length);
@@ -29,7 +29,7 @@ int VC::connect(String^ hostName, int portNumber)
 	// Convert incoming data from an array of unsigned char bytes to an ASCII string
 	ResponseData = System::Text::Encoding::ASCII->GetString(ReadData);
 	// Print the received string on the screen
-	//Console::WriteLine(ResponseData);*/
+	Console::WriteLine(ResponseData);
 	return 1;
 }
 int VC::setupSharedMemory()
@@ -66,13 +66,14 @@ int VC::getData()
 		SendData[i] = buffer[i];
 	}*/
 	String^ buffer = gcnew String("# " + VCData->Steering + " " + VCData->Speed + " " + flag + " #");
+
 	if(VCData->Steering <= 40 && VCData->Steering >= -40 && VCData->Speed<=1 && VCData->Speed>=-1)
 	SendData = System::Text::Encoding::ASCII->GetBytes(buffer);
-	std::cout << "Steering: " << VCData->Steering << " Speed: " << VCData->Speed << " Flag: " << flag << std::endl;
-	Console::WriteLine(SendData);
-	//Stream->WriteByte(0x02);
+	//std::cout << "Steering: " << VCData->Steering << " Speed: " << VCData->Speed << " Flag: " << flag << std::endl;
+	//Console::WriteLine(buffer);
+	Stream->WriteByte(0x02);
 	Stream->Write(SendData, 0, SendData->Length);
-	//Stream->WriteByte(0x03);
+	Stream->WriteByte(0x03);
 	return 1;
 }
 int VC::checkData()

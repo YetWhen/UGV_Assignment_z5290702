@@ -48,7 +48,7 @@ int main()
 	//create an array of module names and a critical list in its corresponding order.
 	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
 	array<int>^ Critical = gcnew array<int>(/*NUM_UNITS*/5) { 1, 1, 1, 0, 1 }; 
-	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 1, 3, 1, 3, 1000 };
+	array<long int>^ TimeLimit = gcnew array<long int>(/*NUM_UNITS*/5) { 6, 4, 2, 12, 4 };
 
 	unsigned char shutdown = 0;
 
@@ -88,10 +88,9 @@ int main()
 			//PMData->Heartbeat.Status & (1<<i)     
 			//by shifting 1 bit by bit (00000001, 00000010,...) use AND & operation to compare with Status byte bit by bit.
 			//eg. status & 00000001 = first(LSB, 0th) bit of status
-
 			if (PMData->Heartbeat.Status & (1 << i))
 			{
-
+				std::cout << 1 << " ";
 				PMData->Heartbeat.Status = PMData->Heartbeat.Status & (~(1 << i));  //turn i th bit to 0, turning off heartbeat
 				PMData->LifeCounter[i] = 0;
 
@@ -100,7 +99,7 @@ int main()
 			else
 			{
 				PMData->LifeCounter[i]++;
-
+				std::cout << 0 << " ";
 				if (PMData->LifeCounter[i] > TimeLimit[i])
 				{
 					if (Critical[i])
@@ -122,10 +121,11 @@ int main()
 					}
 				}
 			}
+			
 
 		}
-
-		Thread::Sleep(1000);
+		std::cout << std::endl;
+		Thread::Sleep(125);
 		if (shutdown) {
 			break;
 		}

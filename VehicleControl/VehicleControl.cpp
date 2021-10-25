@@ -70,7 +70,7 @@ int VC::getData()
 	if(VCData->Steering <= 40 && VCData->Steering >= -40 && VCData->Speed<=1 && VCData->Speed>=-1)
 	SendData = System::Text::Encoding::ASCII->GetBytes(buffer);
 	//std::cout << "Steering: " << VCData->Steering << " Speed: " << VCData->Speed << " Flag: " << flag << std::endl;
-	//Console::WriteLine(buffer);
+	Console::WriteLine(buffer);
 	Stream->WriteByte(0x02);
 	Stream->Write(SendData, 0, SendData->Length);
 	Stream->WriteByte(0x03);

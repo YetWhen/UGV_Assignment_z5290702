@@ -37,5 +37,6 @@ protected:
 	array<unsigned char>^ SendData;
 	String^ AskScan;
 	String^ ResponseData;
+	int Datachecker;
 
 };

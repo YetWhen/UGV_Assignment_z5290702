@@ -46,8 +46,9 @@ int main()
 			}
 		}
 		LaserModule->getData();
-		if(LaserModule->checkData())
-		LaserModule->sendDataToSharedMemory();
+		if (LaserModule->checkData()) {
+			LaserModule->sendDataToSharedMemory();
+		}
 		Thread::Sleep(25);
 		if (LaserModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;

@@ -86,13 +86,41 @@ int Laser::getData()
 //check if data is in desired format
 int Laser::checkData()
 {
+	Datachecker = 1;
 	array<wchar_t>^ Space = { ' ' };
 	array<String^>^ StringArray = ResponseData->Split(Space);
-	if (StringArray[1] == "LMDscandata")
-		
+	if (StringArray[1] == "LMDscandata" && (StringArray->Length > (25 + 361)) && (StringArray[25] == "169"))
+	{
+		try
+		{
+			double StartAngle = System::Convert::ToInt32(StringArray[23], 16);
+		}
+		catch (FormatException^)
+		{
+			Console::WriteLine("Bad String  " + StringArray[23]);
+			Datachecker = 0;
+		}
+		try
+		{
+			double Resolution = System::Convert::ToInt32(StringArray[24], 16) / 10000.0;
+		}
+		catch (FormatException^)
+		{
+			Console::WriteLine("Bad String  " + StringArray[24]);
+			Datachecker = 0;
+		}
+		try
+		{
+			int NumRanges = System::Convert::ToInt32(StringArray[25], 16);
+		}
+		catch (FormatException^)
+		{
+			Console::WriteLine("Bad String  " + StringArray[25]);
+			Datachecker = 0;
+		}
 		return 1;
+	}
 	else
-		Console::WriteLine(ResponseData);
 		return 0;
 }
 //convert data points to x y coordinates and push into shared memory
@@ -107,7 +135,19 @@ int Laser::sendDataToSharedMemory()
 	array<double>^ Range = gcnew array<double>(NumRanges);
 	for (int i = 0; i < NumRanges; i++)
 	{
-		Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
+		try
+		{
+			Console::WriteLine(25 + i);
+			Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
+			
+			
+		}
+		catch (FormatException^)
+		{
+			Console::WriteLine("Bad String  " + StringArray[25+i]);
+			Datachecker = 0;
+		}
+		//Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
 		LaserData->x[i] = Range[i] * sin(i * Resolution/360*2*(2*acos(0.0)));
 		LaserData->y[i] = Range[i] * cos(i * Resolution / 360 * 2 * (2 * acos(0.0)));
 		Console::WriteLine("X-coordinate: {0,6:F2} , Y-Coordinate: {1,6:F2}", LaserData->x[i], LaserData->y[i]);

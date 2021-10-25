@@ -89,6 +89,7 @@ int Laser::checkData()
 	Datachecker = 1;
 	array<wchar_t>^ Space = { ' ' };
 	array<String^>^ StringArray = ResponseData->Split(Space);
+	Console::WriteLine(StringArray->Length);
 	if (StringArray[1] == "LMDscandata" && (StringArray->Length > (25 + 361)) && (StringArray[25] == "169"))
 	{
 		try
@@ -137,7 +138,7 @@ int Laser::sendDataToSharedMemory()
 	{
 		try
 		{
-			Console::WriteLine(25 + i);
+			Console::WriteLine(25+i);
 			Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
 			
 			

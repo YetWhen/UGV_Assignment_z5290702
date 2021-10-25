@@ -49,7 +49,7 @@ int main()
 		if (LaserModule->checkData()) {
 			LaserModule->sendDataToSharedMemory();
 		}
-		Thread::Sleep(25);
+		Thread::Sleep(50);
 		if (LaserModule->getShutdownFlag())   //emergency shutdown controlled by shared memory
 			break;
 		if (_kbhit())  //regular shutdown

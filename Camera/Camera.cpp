@@ -87,7 +87,7 @@ void idle()
 	else
 	{
 		PMCounter++;
-		if (PMCounter > 5000)
+		if (PMCounter > 10000)
 		{
 			PMData->Shutdown.Status = 0xFF;
 			std::cout << "No response from PM" << " PMCounter: " << PMCounter << std::endl;

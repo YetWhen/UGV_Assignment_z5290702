@@ -74,7 +74,7 @@ int Laser::getData()
 	Stream->Write(SendData, 0, SendData->Length);
 	Stream->WriteByte(0x03);
 	// Wait for the server to prepare the data, 1 ms would be sufficient, but used 10 ms
-	System::Threading::Thread::Sleep(10);
+	System::Threading::Thread::Sleep(20);
 	// Read the incoming data
 	Stream->Read(ReadData, 0, ReadData->Length);
 	// Convert incoming data from an array of unsigned char bytes to an ASCII string
@@ -86,10 +86,8 @@ int Laser::getData()
 //check if data is in desired format
 int Laser::checkData()
 {
-	Datachecker = 1;
 	array<wchar_t>^ Space = { ' ' };
 	array<String^>^ StringArray = ResponseData->Split(Space);
-	Console::WriteLine(StringArray->Length);
 	if (StringArray[1] == "LMDscandata" && (StringArray->Length > (25 + 361)) && (StringArray[25] == "169"))
 	{
 		try
@@ -99,7 +97,6 @@ int Laser::checkData()
 		catch (FormatException^)
 		{
 			Console::WriteLine("Bad String  " + StringArray[23]);
-			Datachecker = 0;
 		}
 		try
 		{
@@ -108,7 +105,6 @@ int Laser::checkData()
 		catch (FormatException^)
 		{
 			Console::WriteLine("Bad String  " + StringArray[24]);
-			Datachecker = 0;
 		}
 		try
 		{
@@ -117,7 +113,6 @@ int Laser::checkData()
 		catch (FormatException^)
 		{
 			Console::WriteLine("Bad String  " + StringArray[25]);
-			Datachecker = 0;
 		}
 		return 1;
 	}
@@ -138,17 +133,24 @@ int Laser::sendDataToSharedMemory()
 	{
 		try
 		{
-			Console::WriteLine(25+i);
-			Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
-			
-			
+			Console::WriteLine(StringArray[i + 26]);
+			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 		}
 		catch (FormatException^)
 		{
-			Console::WriteLine("Bad String  " + StringArray[25+i]);
-			Datachecker = 0;
+			Console::WriteLine("Bad String  " + StringArray[26+i]);
 		}
-		//Range[i] = System::Convert::ToInt32(StringArray[25 + i], 16);
+		catch (ArgumentOutOfRangeException^)
+		{
+			Console::WriteLine("StringArray["+i+"+26]: "+StringArray[26 + i]+"||||");
+			Console::WriteLine(StringArray[27 + i] + "||||");
+			if (StringArray[26 + i] == "\n")
+				Console::WriteLine("String array returns a change line");
+			Console::WriteLine("Size of StringArray[i+26]: " + sizeof(StringArray[26 + i]));
+			continue;
+			//Console::ReadKey();
+		}
+		//Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 		LaserData->x[i] = Range[i] * sin(i * Resolution/360*2*(2*acos(0.0)));
 		LaserData->y[i] = Range[i] * cos(i * Resolution / 360 * 2 * (2 * acos(0.0)));
 		Console::WriteLine("X-coordinate: {0,6:F2} , Y-Coordinate: {1,6:F2}", LaserData->x[i], LaserData->y[i]);

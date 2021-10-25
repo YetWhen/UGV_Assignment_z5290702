@@ -39,7 +39,7 @@ int main()
 		else
 		{
 			PMcounter++;
-			if (PMcounter > 60)
+			if (PMcounter > 120)
 			{
 				Console::WriteLine("No response from ProcessManagement, exit");
 				break;

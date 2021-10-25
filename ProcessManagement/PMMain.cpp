@@ -212,7 +212,7 @@ void Restart1Process(int i)
 		_getch();
 	}
 	std::cout << "Restarted: " << Units[i] << std::endl;   //this function is only used in restarting process
-	Sleep(100);
+	Sleep(250);
 	/*	// Close process and thread handles.
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread); */

@@ -142,10 +142,10 @@ int Laser::sendDataToSharedMemory()
 		}
 		catch (ArgumentOutOfRangeException^)
 		{
-			Console::WriteLine("StringArray["+i+"+26]: "+StringArray[26 + i]+"||||");
-			Console::WriteLine(StringArray[27 + i] + "||||");
-			if (StringArray[26 + i] == "\n")
-				Console::WriteLine("String array returns a change line");
+			Console::WriteLine("Index out of range, Bad String element");
+			Console::WriteLine("StringArray["+i+"+26]: "+StringArray[26 + i]+"|end of this element|");
+			Console::WriteLine("Next element: " + StringArray[27 + i] + "|end of this element|");
+
 			Console::WriteLine("Size of StringArray[i+26]: " + sizeof(StringArray[26 + i]));
 			continue;
 			//Console::ReadKey();

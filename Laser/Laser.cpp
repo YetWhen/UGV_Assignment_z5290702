@@ -129,12 +129,13 @@ int Laser::sendDataToSharedMemory()
 	double Resolution = System::Convert::ToInt32(StringArray[24], 16) / 10000.0;
 	int NumRanges = System::Convert::ToInt32(StringArray[25], 16);
 	array<double>^ Range = gcnew array<double>(NumRanges);
+	double temp;
+	int badStringCounter = 0;
 	for (int i = 0; i < NumRanges; i++)
 	{
 		try
 		{
-			Console::WriteLine(StringArray[i + 26]);
-			Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
+			temp = System::Convert::ToInt32(StringArray[26 + i], 16);
 		}
 		catch (FormatException^)
 		{
@@ -142,15 +143,15 @@ int Laser::sendDataToSharedMemory()
 		}
 		catch (ArgumentOutOfRangeException^)
 		{
+			badStringCounter++;
+			if (badStringCounter > 5)
+				break;
 			Console::WriteLine("Index out of range, Bad String element");
 			Console::WriteLine("StringArray["+i+"+26]: "+StringArray[26 + i]+"|end of this element|");
-			Console::WriteLine("Next element: " + StringArray[27 + i] + "|end of this element|");
-
-			Console::WriteLine("Size of StringArray[i+26]: " + sizeof(StringArray[26 + i]));
 			continue;
 			//Console::ReadKey();
 		}
-		//Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
+		Range[i] = System::Convert::ToInt32(StringArray[26 + i], 16);
 		LaserData->x[i] = Range[i] * sin(i * Resolution/360*2*(2*acos(0.0)));
 		LaserData->y[i] = Range[i] * cos(i * Resolution / 360 * 2 * (2 * acos(0.0)));
 		Console::WriteLine("X-coordinate: {0,6:F2} , Y-Coordinate: {1,6:F2}", LaserData->x[i], LaserData->y[i]);

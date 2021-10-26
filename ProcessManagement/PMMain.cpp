@@ -27,7 +27,7 @@ TCHAR Units[10][20] =                           //array of .exe file names for m
 	TEXT("Laser2.exe"),
 	TEXT("Display.exe"),
 	TEXT("VehicleControl.exe"),
-	TEXT("GPS.exe"),
+	TEXT("GPS_z5290702.exe"),
 	TEXT("Camera.exe")
 };
 struct GPS                                   //latitude and longitude, SM_GPS has nothing easting height
@@ -48,7 +48,7 @@ int main()
 	//create an array of module names and a critical list in its corresponding order.
 	//array<String^>^ ModuleList = gcnew array<String^>{"Laser", "Display", "VechicleControl", "GPS", "Camera"};
 	array<int>^ Critical = gcnew array<int>(NUM_UNITS) { 1, 1, 1, 0, 1 }; 
-	array<long int>^ TimeLimit = gcnew array<long int>(NUM_UNITS) { 6, 10, 5, 12, 10 };
+	array<long int>^ TimeLimit = gcnew array<long int>(NUM_UNITS) { 6, 10, 5, 20, 10 };
 
 	unsigned char shutdown = 0;
 

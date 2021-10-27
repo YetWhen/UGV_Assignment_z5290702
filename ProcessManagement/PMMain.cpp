@@ -25,7 +25,7 @@ void Restart1Process(int i);
 TCHAR Units[10][20] =                           //array of .exe file names for main loop to find
 {
 	TEXT("Laser2.exe"),
-	TEXT("Display.exe"),
+	TEXT("Displayz5290702.exe"),
 	TEXT("VehicleControl.exe"),
 	TEXT("GPS_z5290702.exe"),
 	TEXT("Camera.exe")
